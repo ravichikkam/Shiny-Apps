@@ -4,20 +4,35 @@ library(datasets)
 
 
 ui <- fluidPage(
+
   tags$h1("Understanding Iris Dataset"),
+  
   sidebarLayout(
     sidebarPanel(
+      
+      fileInput("file1", "Choose CSV File",
+                accept = c(
+                  "text/csv",
+                  "text/comma-separated-values,text/plain",
+                  ".csv")
+      ),
+      
+      tags$hr(),
       selectInput(inputId = "drop", 
-              label = "Select a month",
-              choices = colnames(iris)
-              ),
+                  label = "Select a month",
+                  choices = colnames(iris)
+      ),
+      
+      tags$hr(),
       actionButton(inputId = "go",
                    label = "Update")
+      
     ),
     
     mainPanel(
-     plotOutput(outputId = "hist"),
-     verbatimTextOutput(outputId = "sum")
+      
+      plotOutput(outputId = "hist"),
+      verbatimTextOutput(outputId = "sum")
     )
   )
 )
