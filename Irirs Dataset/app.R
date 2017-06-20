@@ -16,6 +16,8 @@ ui <- fluidPage(
                   "text/comma-separated-values,text/plain",
                   ".csv")
       ),
+      actionButton(inputId = "up",
+                   label = "Upload"),
       
       tags$hr(),
       selectInput(inputId = "drop", 
@@ -32,13 +34,18 @@ ui <- fluidPage(
     mainPanel(
       
       plotOutput(outputId = "hist"),
-      verbatimTextOutput(outputId = "sum")
+      verbatimTextOutput(outputId = "sum"),
+      tableOutput(outputId = "dataset")
     )
   )
 )
 
 server <- function(input, output) {
   
+  output$dataset <- renderTable({
+    datafile <- input$file1
+    read.csv(file = datafile$datapath)
+  }) 
   data <- eventReactive(input$go, {input$drop})
   output$hist <- renderPlot({
     
