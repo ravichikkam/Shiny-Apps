@@ -5,7 +5,7 @@ library(datasets)
 
 ui <- fluidPage(
   
-  tags$h1("Understanding your Dataset"),
+  tags$h1("Understanding your Data"),
   
   sidebarLayout(
     sidebarPanel(
