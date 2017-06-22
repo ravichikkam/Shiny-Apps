@@ -10,6 +10,7 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       
+      #uiOutput("file1")
       fileInput("file1", "Choose CSV File",
                 accept = c(
                   "text/csv",
@@ -20,10 +21,11 @@ ui <- fluidPage(
                    label = "Upload"),
       
       tags$hr(),
-      selectInput(inputId = "drop", 
-                  label = "Select a month",
-                  choices = colnames(iris)
-      ),
+      uiOutput("drop"),
+      # selectInput(inputId = "drop", 
+      #             label = "Select a month",
+      #             choices = colnames(iris)
+      #),
       
       tags$hr(),
       actionButton(inputId = "go",
@@ -34,27 +36,46 @@ ui <- fluidPage(
     mainPanel(
       
       plotOutput(outputId = "hist"),
-      verbatimTextOutput(outputId = "sum"),
-      tableOutput(outputId = "dataset")
+      verbatimTextOutput(outputId = "sum")
+      #tableOutput(outputId = "dataset")
     )
   )
 )
 
 server <- function(input, output) {
   
-  output$dataset <- renderTable({
+  # output$dataset <- renderTable({
+  #   datafile <- input$file1
+  #   read.csv(file = datafile$datapath)
+  # }) 
+  output$drop <- renderUI({
     datafile <- input$file1
-    read.csv(file = datafile$datapath)
-  }) 
-  data <- eventReactive(input$go, {input$drop})
+    if(is.null(datafile)){
+      return(NULL)
+    }
+    data <- read.csv(file = datafile$datapath)
+    selectInput("coloums", "Select a variable", choices = colnames(data))
+  })
+  cname <- eventReactive(input$go, {input$drop})
+  
   output$hist <- renderPlot({
-    
-    ggplot(data = iris, aes_string(x = data())) + geom_bar(fill = "blue")
+    datafile1 <- input$file1
+    if(is.null(datafile1)){
+      return(NULL)
+    }
+    data1 <- read.csv(file = datafile1$datapath)
+    data1 <- na.omit(data1)
+    ggplot(data = data1, aes_string(cname())) + geom_bar(fill = "blue")
     
   })
   
   output$sum <- renderPrint({
-    summary(iris[,data()])
+    datafile2 <- input$file1
+    if(is.null(datafile2)){
+      return(NULL)
+    }
+    data2 <- read.csv(file = datafile2$datapath)
+    summary(data2[,cname()])
   })
   
 }
