@@ -4,8 +4,8 @@ library(datasets)
 
 
 ui <- fluidPage(
-
-  tags$h1("Understanding Iris Dataset"),
+  
+  tags$h1("Understanding your Dataset"),
   
   sidebarLayout(
     sidebarPanel(
@@ -17,9 +17,7 @@ ui <- fluidPage(
                   "text/comma-separated-values,text/plain",
                   ".csv")
       ),
-      actionButton(inputId = "up",
-                   label = "Upload"),
-      
+
       tags$hr(),
       uiOutput("drop"),
       # selectInput(inputId = "drop", 
@@ -44,38 +42,34 @@ ui <- fluidPage(
 
 server <- function(input, output) {
   
-  # output$dataset <- renderTable({
-  #   datafile <- input$file1
-  #   read.csv(file = datafile$datapath)
-  # }) 
-  output$drop <- renderUI({
+  data <- reactive({
     datafile <- input$file1
     if(is.null(datafile)){
       return(NULL)
     }
-    data <- read.csv(file = datafile$datapath)
-    selectInput("coloums", "Select a variable", choices = colnames(data))
+    dataset <- read.csv(datafile$datapath)
+    dataset <- na.omit(dataset)
+    return(dataset)
+  }) 
+  output$drop <- renderUI({
+    
+    selectInput("coloums", "Select a variable", choices = colnames(data()))
+    
   })
-  cname <- eventReactive(input$go, {input$drop})
+  
+  cname <- eventReactive(input$go, {input$coloums})
+  
   
   output$hist <- renderPlot({
-    datafile1 <- input$file1
-    if(is.null(datafile1)){
-      return(NULL)
-    }
-    data1 <- read.csv(file = datafile1$datapath)
-    data1 <- na.omit(data1)
-    ggplot(data = data1, aes_string(cname())) + geom_bar(fill = "blue")
+    
+      ggplot(data = data(), aes_string(x = cname())) + geom_bar(fill = "blue")
     
   })
   
   output$sum <- renderPrint({
-    datafile2 <- input$file1
-    if(is.null(datafile2)){
-      return(NULL)
-    }
-    data2 <- read.csv(file = datafile2$datapath)
-    summary(data2[,cname()])
+   
+    summary(data()[,cname()])
+    
   })
   
 }
